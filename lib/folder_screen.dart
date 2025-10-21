@@ -29,10 +29,25 @@ class _FolderScreenState extends State<FolderScreen> {
     return cards.length;
   }
 
+  Future<void> _deleteAllCards() async {
+    await dbHelper.deleteAllCards();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('All cards deleted')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Folders")),
+      appBar: AppBar(
+        title: const Text("Folders"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_forever),
+            onPressed: _deleteAllCards,
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: GridView.builder(
@@ -94,11 +109,6 @@ class _FolderScreenState extends State<FolderScreen> {
           },
         ),
       ),
-      // Optional: remove FAB entirely or repurpose for folder creation
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {}, // e.g., open "create folder" dialog
-      //   child: const Icon(Icons.create_new_folder),
-      // ),
     );
   }
 }

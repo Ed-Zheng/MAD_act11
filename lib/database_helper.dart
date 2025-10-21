@@ -192,4 +192,11 @@ class DatabaseHelper {
     final db = await database;
     return await db.delete(cardTable, where: 'id = ?', whereArgs: [id]);
   }
+
+  Future<void> deleteAllCards() async {
+    final db = await database;
+    await db.delete(cardTable);
+  }
+  
+
 }
