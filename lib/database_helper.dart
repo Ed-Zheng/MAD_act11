@@ -178,11 +178,6 @@ class DatabaseHelper {
     return maps.map((m) => CardItem.fromMap(m)).toList();
   }
 
-  Future<int> insertCard(CardItem card) async {
-    final db = await database;
-    return await db.insert(cardTable, card.toMap());
-  }
-
   Future<int> updateCard(CardItem card) async {
     final db = await database;
     return await db.update(

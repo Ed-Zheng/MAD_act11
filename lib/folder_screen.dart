@@ -50,7 +50,7 @@ class _FolderScreenState extends State<FolderScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const CardScreen(),
+                    builder: (_) => CardScreen(folder: folder),
                   ),
                 ).then((_) => _loadFolders());
               },
@@ -67,23 +67,20 @@ class _FolderScreenState extends State<FolderScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         folder.previewImage != null
-                          ? Image.network(
-                              folder.previewImage!,
-                              height: 80,
-                              width: 80,
-                              fit: BoxFit.cover,
-                            )
-                          : const Icon(Icons.folder, size: 80),
-
+                            ? Image.network(
+                                folder.previewImage!,
+                                height: 80,
+                                width: 80,
+                                fit: BoxFit.cover,
+                              )
+                            : const Icon(Icons.folder, size: 80),
                         const SizedBox(height: 8),
-
                         Text(
                           folder.name,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        
                         Text(
                           "$count cards",
                           style: const TextStyle(color: Colors.grey),
@@ -97,6 +94,11 @@ class _FolderScreenState extends State<FolderScreen> {
           },
         ),
       ),
+      // Optional: remove FAB entirely or repurpose for folder creation
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {}, // e.g., open "create folder" dialog
+      //   child: const Icon(Icons.create_new_folder),
+      // ),
     );
   }
 }
