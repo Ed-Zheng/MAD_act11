@@ -97,20 +97,26 @@ class _CardScreenState extends State<CardScreen> {
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Image.network(
+                            Image.asset(
                               card.imageUrl,
                               height: 100,
                               width: 100,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
-                                  const Icon(Icons.image, size: 80),
                             ),
+
                             const SizedBox(height: 8),
-                            Text(card.name,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                            Text(card.suit,
-                                style: const TextStyle(color: Colors.grey)),
+
+                            Text(
+                              card.name,
+                              style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            Text(
+                              card.suit,
+                              style: const TextStyle(color: Colors.grey)
+                            ),
                           ],
                         ),
                         Positioned(

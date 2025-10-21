@@ -36,6 +36,33 @@ class _FolderScreenState extends State<FolderScreen> {
     );
   }
 
+  Future<void> _insertAllCards() async {
+    final suits = ['Spades', 'Clubs', 'Diamonds', 'Hearts'];
+    final ranks = ['Ace', 'Two', 'Three', 'Four', 'Five'];
+
+    for (var suit in suits) {
+      for (var rank in ranks) {
+        final name = '$rank of $suit';
+        final imagePath = 'assets/${rank}_${suit}.png';
+
+        await dbHelper.insertCard(
+          CardItem(
+            name: name,
+            suit: suit,
+            imageUrl: imagePath,
+            folderId: null,
+            createdAt: DateTime.now(),
+          ),
+        );
+      }
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sample cards inserted!')),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,6 +135,10 @@ class _FolderScreenState extends State<FolderScreen> {
             );
           },
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _insertAllCards,
+        child: const Icon(Icons.playlist_add),
       ),
     );
   }

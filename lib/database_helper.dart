@@ -197,6 +197,9 @@ class DatabaseHelper {
     final db = await database;
     await db.delete(cardTable);
   }
-  
 
+  Future<int> insertCard(CardItem card) async {
+    final db = await database;
+    return await db.insert(cardTable, card.toMap());
+  }
 }
