@@ -1,114 +1,135 @@
+import 'dart:io';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
+class Folder {
+  int? id;
+  String name;
+  String? previewImage;
+  DateTime createdAt;
+
+  Folder({
+    this.id,
+    required this.name,
+    this.previewImage,
+    required this.createdAt,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'previewImage': previewImage,
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
+
+  factory Folder.fromMap(Map<String, dynamic> map) {
+    return Folder(
+      id: map['id'],
+      name: map['name'],
+      previewImage: map['previewImage'],
+      createdAt: DateTime.parse(map['createdAt']),
+    );
+  }
+}
+
+class CardItem {
+  int? id;
+  String name;
+  String suit;
+  String imageUrl;
+  String? imageBytes; // optional base64 image data
+  int? folderId; // nullable = unassigned
+  DateTime createdAt;
+
+  CardItem({
+    this.id,
+    required this.name,
+    required this.suit,
+    required this.imageUrl,
+    this.imageBytes,
+    this.folderId,
+    required this.createdAt,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'suit': suit,
+      'imageUrl': imageUrl,
+      'imageBytes': imageBytes,
+      'folderId': folderId,
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
+
+  factory CardItem.fromMap(Map<String, dynamic> map) {
+    return CardItem(
+      id: map['id'],
+      name: map['name'],
+      suit: map['suit'],
+      imageUrl: map['imageUrl'],
+      imageBytes: map['imageBytes'],
+      folderId: map['folderId'],
+      createdAt: DateTime.parse(map['createdAt']),
+    );
+  }
+}
 
 class DatabaseHelper {
-  static const _databaseName = "MyDatabase.db";
+  static const _databaseName = "folders_cards.db";
   static const _databaseVersion = 1;
 
+  static const folderTable = 'folders';
+  static const cardTable = 'cards';
 
-  static const table = 'my_table';
+  static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
+  static Database? _database;
 
+  DatabaseHelper._privateConstructor();
 
-  static const columnId = '_id';
-  static const columnName = 'name';
-  static const columnAge = 'age';
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+    _database = await _initDatabase();
+    return _database!;
+  }
 
-
-  late Database _db;
-
-
-  // this opens the database (and creates it if it doesn't exist)
-  Future<void> init() async {
-    final documentsDirectory = await getApplicationDocumentsDirectory();
-    final path = join(documentsDirectory.path, _databaseName);
-    _db = await openDatabase(
+  Future<Database> _initDatabase() async {
+    Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    String path = join(documentsDirectory.path, _databaseName);
+    return await openDatabase(
       path,
       version: _databaseVersion,
       onCreate: _onCreate,
     );
   }
 
-
-  // SQL code to create the database table
-  Future _onCreate(Database db, int version) async {
+  Future<void> _onCreate(Database db, int version) async {
+    // Folder table
     await db.execute('''
-          CREATE TABLE $table (
-            $columnId INTEGER PRIMARY KEY,
-            $columnName TEXT NOT NULL,
-            $columnAge INTEGER NOT NULL
-          )
-          ''');
+      CREATE TABLE $folderTable (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        previewImage TEXT,
+        createdAt TEXT NOT NULL
+      )
+    ''');
+
+    // Card table
+    await db.execute('''
+      CREATE TABLE $cardTable (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        suit TEXT NOT NULL,
+        imageUrl TEXT NOT NULL,
+        imageBytes TEXT,
+        folderId INTEGER,
+        createdAt TEXT NOT NULL,
+        FOREIGN KEY (folderId) REFERENCES $folderTable (id) ON DELETE SET NULL
+      )
+    ''');
   }
-
-
-  // Helper methods
-
-
-  // Inserts a row in the database where each key in the Map is a column name
-  // and the value is the column value. The return value is the id of the
-  // inserted row.
-  Future<int> insert(Map<String, dynamic> row) async {
-    return await _db.insert(table, row);
-  }
-
-
-  // All of the rows are returned as a list of maps, where each map is
-  // a key-value list of columns.
-  Future<List<Map<String, dynamic>>> queryAllRows() async {
-    return await _db.query(table);
-  }
-
-
-  // All of the methods (insert, query, update, delete) can also be done using
-  // raw SQL commands. This method uses a raw query to give the row count.
-  Future<int> queryRowCount() async {
-    final results = await _db.rawQuery('SELECT COUNT(*) FROM $table');
-    return Sqflite.firstIntValue(results) ?? 0;
-  }
-
-
-  // We are assuming here that the id column in the map is set. The other
-  // column values will be used to update the row.
-  Future<int> update(Map<String, dynamic> row) async {
-    int id = row[columnId];
-    return await _db.update(
-      table,
-      row,
-      where: '$columnId = ?',
-      whereArgs: [id],
-    );
-  }
-
-
-  // Deletes the row specified by the id. The number of affected rows is
-  // returned. This should be 1 as long as the row exists.
-  Future<int> delete(int id) async {
-    return await _db.delete(
-      table,
-      where: '$columnId = ?',
-      whereArgs: [id],
-    );
-  }
-
-  // Query by ID
-  Future<Map<String, dynamic>?> queryId(int id) async {
-    final results = await _db.query(
-      table,
-      where: '$columnId = ?',
-      whereArgs: [id],
-    );
-    if (results.isNotEmpty) {
-      return results.first;
-    } else {
-      return null;
-    }
-  }
-
-  // Delete all records
-  Future<int> deleteAll() async {
-    return await _db.delete(table);
-  }
-
 }
