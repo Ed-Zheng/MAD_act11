@@ -132,4 +132,69 @@ class DatabaseHelper {
       )
     ''');
   }
+
+  // Folder methods
+  Future<List<Folder>> getAllFolders() async {
+    final db = await database;
+    final maps = await db.query(folderTable, orderBy: 'createdAt DESC');
+    return maps.map((m) => Folder.fromMap(m)).toList();
+  }
+
+  Future<Folder?> getFolder(int id) async {
+    final db = await database;
+    final maps =
+        await db.query(folderTable, where: 'id = ?', whereArgs: [id], limit: 1);
+    if (maps.isNotEmpty) {
+      return Folder.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  // Card methods
+  Future<List<CardItem>> getAllCards() async {
+    final db = await database;
+    final maps = await db.query(cardTable, orderBy: 'createdAt DESC');
+    return maps.map((m) => CardItem.fromMap(m)).toList();
+  }
+
+  Future<List<CardItem>> getCardsByFolder(int folderId) async {
+    final db = await database;
+    final maps = await db.query(
+      cardTable,
+      where: 'folderId = ?',
+      whereArgs: [folderId],
+      orderBy: 'createdAt DESC',
+    );
+    return maps.map((m) => CardItem.fromMap(m)).toList();
+  }
+
+  Future<List<CardItem>> getUnassignedCards() async {
+    final db = await database;
+    final maps = await db.query(
+      cardTable,
+      where: 'folderId IS NULL',
+      orderBy: 'createdAt DESC',
+    );
+    return maps.map((m) => CardItem.fromMap(m)).toList();
+  }
+
+  Future<int> insertCard(CardItem card) async {
+    final db = await database;
+    return await db.insert(cardTable, card.toMap());
+  }
+
+  Future<int> updateCard(CardItem card) async {
+    final db = await database;
+    return await db.update(
+      cardTable,
+      card.toMap(),
+      where: 'id = ?',
+      whereArgs: [card.id],
+    );
+  }
+
+  Future<int> deleteCard(int id) async {
+    final db = await database;
+    return await db.delete(cardTable, where: 'id = ?', whereArgs: [id]);
+  }
 }
