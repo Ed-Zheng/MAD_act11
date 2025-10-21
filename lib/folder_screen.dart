@@ -62,6 +62,13 @@ class _FolderScreenState extends State<FolderScreen> {
     );
   }
 
+  Future<String?> _getFirstCardImage(int folderId) async {
+    final cards = await dbHelper.getCardsByFolder(folderId);
+    if (cards.isNotEmpty) {
+      return cards.first.imageUrl;
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,35 +107,41 @@ class _FolderScreenState extends State<FolderScreen> {
                 future: _getCardCount(folder.id!),
                 builder: (context, snapshot) {
                   final count = snapshot.data ?? 0;
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 4,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        folder.previewImage != null
-                            ? Image.network(
-                                folder.previewImage!,
-                                height: 80,
-                                width: 80,
-                                fit: BoxFit.cover,
-                              )
-                            : const Icon(Icons.folder, size: 80),
-                        const SizedBox(height: 8),
-                        Text(
-                          folder.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
+                  return FutureBuilder<String?>(
+                    future: _getFirstCardImage(folder.id!),
+                    builder: (context, imageSnapshot) {
+                      final previewImage = imageSnapshot.data;
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        Text(
-                          "$count cards",
-                          style: const TextStyle(color: Colors.grey),
+                        elevation: 4,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            previewImage != null
+                              ? Image.asset(
+                                  previewImage,
+                                  height: 80,
+                                  width: 80,
+                                  fit: BoxFit.cover,
+                                )
+                              : const Icon(Icons.folder, size: 80),
+                            const SizedBox(height: 8),
+                            Text(
+                              folder.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              "$count cards",
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   );
                 },
               ),
