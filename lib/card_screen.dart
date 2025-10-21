@@ -26,6 +26,13 @@ class _CardScreenState extends State<CardScreen> {
   }
 
   Future<void> _removeCard(int cardId) async {
+    if (cards.length <= 3) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Folder must have at least 3 cards")),
+      );
+      return;
+    }
+
     final card = cards.firstWhere((c) => c.id == cardId);
     card.folderId = null;
     await dbHelper.updateCard(card);
@@ -33,6 +40,13 @@ class _CardScreenState extends State<CardScreen> {
   }
 
   Future<void> _addCardToFolder() async {
+    if (cards.length >= 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Folder is full (max 6 cards)")),
+      );
+      return;
+    }
+
     final unassigned = await dbHelper.getUnassignedCards();
     if (unassigned.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
